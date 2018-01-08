@@ -108,7 +108,7 @@
       removeArticle(id) {
         this.$Modal.confirm({
           title: '提示',
-          content: '确认删除当前选项?',
+          content: '确认删除当前文章?',
           onOk: () => {
 //            this.$ShowLoading()
             this.$http.post('/api/admin/article/delete', qs.stringify({
@@ -119,7 +119,7 @@
                 this.$Message.error('删除失败')
                 this.$router.push({path: '/admin/main/article'})
               } else if (res.status === 10001) {
-                this.$Message.error('该选项未找到')
+                this.$Message.error('该文章未找到')
                 this.$router.push({path: '/admin/main/article'})
               } else if (res.status === 10000) {
                 this.$Message.success('删除成功')
