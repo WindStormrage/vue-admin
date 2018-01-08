@@ -65,7 +65,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$refs.detail.show(params.row.ID)
+                      this.$router.push({path: '/admin/main/article/detail?id=' + params.row.ID})
                     }
                   }
                 }, '详情'),
@@ -76,7 +76,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$refs.save.show(params.row.ID)
+                      this.$router.push({path: '/admin/main/article/save?id=' + params.row.ID})
                     }
                   }
                 }, '编辑'),
@@ -103,9 +103,6 @@
       })
     },
     methods: {
-      startEdit (index) {
-        this.$refs.save.startEdit(this.articles[index].ID)
-      },
       sizeChange(size) {
         this.query.per = size
         this.$nextTick(() => {
@@ -148,7 +145,9 @@
       },
       listArticle() {
 //        this.$ShowLoading()
-        this.$http.post('/api/admin/article/list', qs.stringify(this.query)).then((response) => {
+        this.$http.post('/api/admin/article/list', qs.stringify(
+          this.query
+        )).then((response) => {
           let res = response.data
           if (res.status === 10000) {
             this.articles = res.articles

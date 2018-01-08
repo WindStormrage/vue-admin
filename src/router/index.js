@@ -4,6 +4,7 @@ import login from '@/components/login'
 import plane from '@/components/main'
 import article from '@/components/article/article'
 import save from '@/components/article/option/save'
+import detail from '@/components/article/option/detail'
 
 Vue.use(Router)
 
@@ -27,6 +28,10 @@ export default new Router({
         {
           path: '/admin/main/article/save',
           component: save
+        },
+        {
+          path: '/admin/main/article/detail',
+          component: detail
         }
       ]
     }

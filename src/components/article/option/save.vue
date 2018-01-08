@@ -5,12 +5,12 @@
 <template>
   <div id="saveArticle">
       <Form :model="form" :label-width="80">
-        <FormItem label="ID" v-if="isEdit">
-          <Input v-model="form.id" placeholder="请输入"/>
-        </FormItem>
-        <FormItem label="ID" v-else>
-          <Input v-model="form.id" placeholder="请输入"/>
-        </FormItem>
+        <!--<FormItem label="ID" v-show="isEdit">-->
+          <!--<Input v-model="form.id" placeholder="请输入"/>-->
+        <!--</FormItem>-->
+        <!--<FormItem label="ID" v-else>-->
+          <!--<Input v-model="form.id" placeholder="请输入"/>-->
+        <!--</FormItem>-->
         <FormItem label="标题">
           <Input v-model="form.title" placeholder="请输入"/>
         </FormItem>
@@ -20,6 +20,7 @@
         <FormItem label="语言">
           <Select v-model="form.language">
             <Option v-for="item in languages" :value="item.Lang" :key="item.Lang">{{ item.Name }}</Option>
+            <!--<Option :value="">通用</Option>-->
           </Select>
         </FormItem>
         <FormItem label="概览">
@@ -46,6 +47,7 @@
     },
     data() {
       return {
+        getID: '',
         isEdit: false,
         languages: [],
         form: {
@@ -65,8 +67,24 @@
     },
     created() {
       this.listLanguage()
+      this.getID = this.$route.query.id
+      if (this.getID !== undefined) {
+        this.isEdit = true
+        this.getDetail()
+      }
     },
     methods: {
+      getDetail () {
+        this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
+          this.form = {
+            id: response.data.article.ID,
+            title: response.data.article.Title,
+            content: response.data.article.Content,
+            language: response.data.article.Language,
+            preview: response.data.article.Preview
+          }
+        })
+      },
       show(article) {
 //        console.log(article)
         if (article) {
@@ -109,20 +127,20 @@
         })
       },
       submit() {
-        if (!this.isEdit) {
-          if (this.form.ID === '') {
-            this.$Message.error('请输入ID')
-            return
-          }
-        }
+//        if (!this.isEdit) {
+//          if (this.form.ID === '') {
+//            this.$Message.error('请输入ID')
+//            return
+//          }
+//        }
         this.form.content = this.$refs.ueditor.getContent()
         console.log(this.form)
-        if (!this.form.id || !this.form.title || !this.form.preview || !this.form.content) {
+        if (!this.form.title || !this.form.preview || !this.form.content) {
           this.$Message.error('内容填写不完整')
           return
         }
         if (!this.form.language) {
-          this.form.language = '全通用'
+          this.form.language = '通用'
         }
 //        this.$ShowLoading()
         this.$http.post('/api/admin/article/save', qs.stringify(this.form)).then((response) => {
@@ -131,6 +149,7 @@
             this.$Message.error('对应文章不存在')
           } else if (res.status === 10000) {
             this.$Message.success('保存成功')
+            this.$router.push({path: '/admin/main/article'})
             this.$emit('refresh')
             this.form = {
               id: 0,

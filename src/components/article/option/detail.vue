@@ -4,43 +4,32 @@
 
 <template>
   <div id="detail">
-    <Modal
-      :width="960"
-      v-model="visible"
-      title="详情"
-      :footerHide="true"
-    >
       <Form :model="form" :label-width="80">
-        <FormItem label="ID">
-          <Input v-model="form.id" />
+        <FormItem label="ID:">
+          {{form.id}}
         </FormItem>
-        <FormItem label="标题">
-          <Input v-model="form.title" />
+        <FormItem label="标题:">
+          {{form.title}}
         </FormItem>
-        <FormItem label="内容">
-          <ueditor :value="form.content" :config="config" ref="ueditor"></ueditor>
+        <FormItem label="语言:">
+          {{form.language}}
         </FormItem>
-        <FormItem label="语言">
-          <Input v-model="form.language" />
+        <FormItem label="内容:">
+          <div v-html="form.content"></div>
         </FormItem>
-        <FormItem label="概览">
-          <Input v-model="form.preview" />
+        <FormItem label="概览:">
+          {{form.preview}}
         </FormItem>
       </Form>
-    </Modal>
   </div>
 
 </template>
 
 <script>
-  import ueditor from '../../ueditor.vue'
-
   export default {
-    components: {
-      ueditor
-    },
     data() {
       return {
+        getID: '',
         form: {
           id: 0,
           title: '',
@@ -56,28 +45,23 @@
         }
       }
     },
+    created() {
+      this.getID = this.$route.query.id
+      if (this.getID !== undefined) {
+        this.getDetail()
+      }
+    },
     methods: {
-      show(article) {
-        if (article) {
+      getDetail () {
+        this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
           this.form = {
-            id: article.ID,
-            title: article.Title,
-            content: article.Content,
-            language: article.Language,
-            preview: article.Preview
+            id: response.data.article.ID,
+            title: response.data.article.Title,
+            content: response.data.article.Content,
+            language: response.data.article.Language,
+            preview: response.data.article.Preview
           }
-        } else {
-          if (this.form.id) {
-            this.form = {
-              id: 0,
-              title: '',
-              content: '',
-              language: '',
-              preview: ''
-            }
-          }
-        }
-        this.visible = true
+        })
       }
     }
   }
