@@ -5,17 +5,22 @@
 <template>
   <div id="saveArticle">
       <Form :model="form" :label-width="80">
-        <FormItem label="ID">
+        <FormItem label="ID" v-if="isEdit">
+          <Input v-model="form.id" placeholder="请输入"/>
+        </FormItem>
+        <FormItem label="ID" v-else>
           <Input v-model="form.id" placeholder="请输入"/>
         </FormItem>
         <FormItem label="标题">
           <Input v-model="form.title" placeholder="请输入"/>
         </FormItem>
-        <FormItem label="标题">
+        <FormItem label="内容">
           <ueditor :value="form.content" :config="config" ref="ueditor"></ueditor>
         </FormItem>
         <FormItem label="语言">
-          <Input v-model="form.language" placeholder="请输入"/>
+          <Select v-model="form.language">
+            <Option v-for="item in languages" :value="item.Lang" :key="item.Lang">{{ item.Name }}</Option>
+          </Select>
         </FormItem>
         <FormItem label="概览">
           <Input v-model="form.preview" placeholder="请输入"/>
@@ -41,6 +46,8 @@
     },
     data() {
       return {
+        isEdit: false,
+        languages: [],
         form: {
           id: 0,
           title: '',
@@ -49,13 +56,21 @@
           preview: ''
         },
         isLoading: false,
-        visible: false
+        visible: false,
+        config: {
+          initialFrameWidth: null,
+          initialFrameHeight: 320
+        }
       }
+    },
+    created() {
+      this.listLanguage()
     },
     methods: {
       show(article) {
 //        console.log(article)
         if (article) {
+          this.isEdit = false
           this.form = {
             id: article.ID,
             title: article.Title,
@@ -64,6 +79,7 @@
             preview: article.Preview
           }
         } else {
+          this.isEdit = true
           if (this.form.id) {
             this.form = {
               id: 0,
@@ -77,10 +93,36 @@
 //        console.log('show')
         this.visible = true
       },
+      listLanguage() {
+//        this.$ShowLoading()
+        this.$http.post('/api/admin/language/list').then((response) => {
+          let res = response.data
+          if (res.status === 10000) {
+            this.languages = res.languages
+          } else {
+            this.$Message.error('获取失败，请稍候再试')
+          }
+//          this.$HideLoading()
+        }).catch(() => {
+//          this.$HideLoading()
+          this.$Message.error('通讯失败，请重试')
+        })
+      },
       submit() {
-        if (!this.form.id || !this.form.title || !this.form.language || !this.form.preview || !this.form.content) {
+        if (!this.isEdit) {
+          if (this.form.ID === '') {
+            this.$Message.error('请输入ID')
+            return
+          }
+        }
+        this.form.content = this.$refs.ueditor.getContent()
+        console.log(this.form)
+        if (!this.form.id || !this.form.title || !this.form.preview || !this.form.content) {
           this.$Message.error('内容填写不完整')
           return
+        }
+        if (!this.form.language) {
+          this.form.language = '全通用'
         }
 //        this.$ShowLoading()
         this.$http.post('/api/admin/article/save', qs.stringify(this.form)).then((response) => {

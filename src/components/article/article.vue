@@ -22,10 +22,12 @@
 <script>
   import qs from 'qs'
   import save from './option/save.vue'
+  import detail from './option/detail.vue'
 
   export default {
     components: {
-      save
+      save,
+      detail
     },
     data() {
       return {
@@ -63,7 +65,18 @@
                   },
                   on: {
                     click: () => {
-                      this.startEdit(params.row)
+                      this.$refs.detail.show(params.row.ID)
+                    }
+                  }
+                }, '详情'),
+                h('Button', {
+                  props: {
+                    type: 'text',
+                    size: 'small'
+                  },
+                  on: {
+                    click: () => {
+                      this.$refs.save.show(params.row.ID)
                     }
                   }
                 }, '编辑'),
@@ -74,7 +87,7 @@
                   },
                   on: {
                     click: () => {
-                      this.removeArticle(params.index)
+                      this.removeArticle(params.row.ID)
                     }
                   }
                 }, '删除')
@@ -124,8 +137,6 @@
               } else if (res.status === 10000) {
                 this.$Message.success('删除成功')
                 this.listArticle()
-              } else {
-                this.$Message.error('删除失败，请稍候再试')
               }
 //              this.$HideLoading()
             }).catch(() => {
