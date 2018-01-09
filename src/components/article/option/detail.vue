@@ -1,4 +1,8 @@
 <style lang="stylus">
+  #detail
+    .ivu-form-item-label
+      font-size 13px
+      font-weight 800
 
 </style>
 
@@ -54,13 +58,20 @@
     methods: {
       getDetail () {
         this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
-          this.form = {
-            id: response.data.article.ID,
-            title: response.data.article.Title,
-            content: response.data.article.Content,
-            language: response.data.article.Language,
-            preview: response.data.article.Preview
+          let res = response.data
+          if (res.status === 10000) {
+            this.form = {
+              id: res.article.ID,
+              title: res.article.Title,
+              content: res.article.Content,
+              language: res.article.Language,
+              preview: res.article.Preview
+            }
+          } else {
+            this.$Message.error('获取失败，请稍候再试')
           }
+        }).catch(() => {
+          this.$Message.error('通讯失败，请重试')
         })
       }
     }

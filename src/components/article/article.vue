@@ -1,5 +1,8 @@
 <style lang="stylus">
   #article
+    .toolbox
+      margin-bottom 20px
+
     .page
       display flex
       margin-top 10px
@@ -9,6 +12,11 @@
 </style>
 <template>
   <div id="article">
+    <div class="toolbox">
+      <Select @on-change="changeLanguage" placeholder="选择类别" style="width:200px;">
+        <Option v-for="item in languages" :value="item.Lang" :key="item.Lang">{{ item.Name }}</Option>
+      </Select>
+    </div>
     <Table :columns="columns" :data="articles" stripe></Table>
     <Button @click="$router.push({path: '/admin/main/article/save'})" type="primary" icon="plus" style="margin-top: 20px">添加文章</Button>
     <!--<save @refresh="listArticle()" ref="save"></save>-->
@@ -32,11 +40,13 @@
     data() {
       return {
         query: {
+          language: '',
           page: 1,
           per: 10
         },
         count: 0,
         articles: [],
+        languages: [],
         columns: [
           {
             title: 'ID',
@@ -48,7 +58,24 @@
           },
           {
             title: '语言',
-            key: 'Language'
+            key: 'Language',
+            render: (h, params) => {
+              let status = params.row.Language
+              let state = '未知'
+              if (status === 'zh-CN') {
+                state = '简体中文'
+              }
+              if (status === 'en-US') {
+                state = '英文'
+              }
+              return h('div', [
+                h('Span', {
+                  props: {
+                    type: 'text'
+                  }
+                }, state)
+              ])
+            }
           },
           {
             title: '概览',
@@ -100,9 +127,16 @@
     mounted() {
       this.$nextTick(() => {
         this.listArticle()
+        this.listLanguage()
       })
     },
     methods: {
+      changeLanguage(value) {
+        this.query.language = value
+        this.$nextTick(() => {
+          this.listArticle()
+        })
+      },
       sizeChange(size) {
         this.query.per = size
         this.$nextTick(() => {
@@ -156,6 +190,21 @@
               per: res.per
             }
             this.count = res.count
+          } else {
+            this.$Message.error('获取失败，请稍候再试')
+          }
+//          this.$HideLoading()
+        }).catch(() => {
+//          this.$HideLoading()
+          this.$Message.error('通讯失败，请重试')
+        })
+      },
+      listLanguage() {
+//        this.$ShowLoading()
+        this.$http.post('/api/admin/language/list', qs.stringify(this.query)).then((response) => {
+          let res = response.data
+          if (res.status === 10000) {
+            this.languages = res.languages
           } else {
             this.$Message.error('获取失败，请稍候再试')
           }

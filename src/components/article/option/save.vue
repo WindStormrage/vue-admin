@@ -5,12 +5,6 @@
 <template>
   <div id="saveArticle">
       <Form :model="form" :label-width="80">
-        <!--<FormItem label="ID" v-show="isEdit">-->
-          <!--<Input v-model="form.id" placeholder="请输入"/>-->
-        <!--</FormItem>-->
-        <!--<FormItem label="ID" v-else>-->
-          <!--<Input v-model="form.id" placeholder="请输入"/>-->
-        <!--</FormItem>-->
         <FormItem label="标题">
           <Input v-model="form.title" placeholder="请输入"/>
         </FormItem>
@@ -18,9 +12,8 @@
           <ueditor :value="form.content" :config="config" ref="ueditor"></ueditor>
         </FormItem>
         <FormItem label="语言">
-          <Select v-model="form.language">
+          <Select v-model="form.language"  placeholder="通用">
             <Option v-for="item in languages" :value="item.Lang" :key="item.Lang">{{ item.Name }}</Option>
-            <!--<Option :value="">通用</Option>-->
           </Select>
         </FormItem>
         <FormItem label="概览">
@@ -39,9 +32,6 @@
   import ueditor from '../../ueditor.vue'
 
   export default {
-//    props: [
-//      'option'
-//    ],
     components: {
       ueditor
     },
@@ -69,48 +59,52 @@
       this.listLanguage()
       this.getID = this.$route.query.id
       if (this.getID !== undefined) {
-        this.isEdit = true
         this.getDetail()
       }
     },
     methods: {
       getDetail () {
         this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
-          this.form = {
-            id: response.data.article.ID,
-            title: response.data.article.Title,
-            content: response.data.article.Content,
-            language: response.data.article.Language,
-            preview: response.data.article.Preview
+          let res = response.data
+          if (res.status === 10000) {
+            this.form = {
+              id: res.article.ID,
+              title: res.article.Title,
+              content: res.article.Content,
+              language: res.article.Language,
+              preview: res.article.Preview
+            }
+          } else {
+            this.$Message.error('获取失败，请稍候再试')
           }
+        }).catch(() => {
+          this.$Message.error('通讯失败，请重试')
         })
       },
-      show(article) {
-//        console.log(article)
-        if (article) {
-          this.isEdit = false
-          this.form = {
-            id: article.ID,
-            title: article.Title,
-            content: article.Content,
-            language: article.Language,
-            preview: article.Preview
-          }
-        } else {
-          this.isEdit = true
-          if (this.form.id) {
-            this.form = {
-              id: 0,
-              title: '',
-              content: '',
-              language: '',
-              preview: ''
-            }
-          }
-        }
-//        console.log('show')
-        this.visible = true
-      },
+//      show(article) {
+//        if (article) {
+//          this.isEdit = false
+//          this.form = {
+//            id: article.ID,
+//            title: article.Title,
+//            content: article.Content,
+//            language: article.Language,
+//            preview: article.Preview
+//          }
+//        } else {
+//          this.isEdit = true
+//          if (this.form.id) {
+//            this.form = {
+//              id: 0,
+//              title: '',
+//              content: '',
+//              language: '',
+//              preview: ''
+//            }
+//          }
+//        }
+//        this.visible = true
+//      },
       listLanguage() {
 //        this.$ShowLoading()
         this.$http.post('/api/admin/language/list').then((response) => {
@@ -127,12 +121,6 @@
         })
       },
       submit() {
-//        if (!this.isEdit) {
-//          if (this.form.ID === '') {
-//            this.$Message.error('请输入ID')
-//            return
-//          }
-//        }
         this.form.content = this.$refs.ueditor.getContent()
         console.log(this.form)
         if (!this.form.title || !this.form.preview || !this.form.content) {
