@@ -5,14 +5,7 @@
 <template>
   <div id="saveArticle">
     <Form :model="form" :label-width="80">
-      <FormItem label="标题">
-        <Input v-model="form.title" placeholder="请输入"/>
-      </FormItem>
-      <FormItem label="标签">
-        <Input v-model="form.tag" placeholder="请输入标签，多个标签以逗号分隔"/>
-      </FormItem>
       <FormItem label="头像">
-
         <Button type="ghost" icon="ios-cloud-upload-outline" @click="toggleShow">上传图片</Button>
         <!--<a class="btn" @click="toggleShow">设置头像</a>-->
         <my-upload field="file"
@@ -20,33 +13,33 @@
                    @crop-upload-success="cropUploadSuccess"
                    @crop-upload-fail="cropUploadFail"
                    v-model="show"
-                   :width="277"
-                   :height="167"
+                   :width="229"
+                   :height="211"
                    noCircle="true"
                    url="/api/admin/file/upload"
                    img-format="png"></my-upload>
-        <!--<img :src="imgDataUrl">-->
-<!--        <Upload action="/api/admin/file/upload" :show-upload-list="false"
-                :on-success="handleSuccess"
-                :on-error="handleErr"
-                :before-upload="beforeUpload"
-                :on-format-error="handleFormatError"
+        <!--<Upload action="/api/admin/file/upload" :show-upload-list="false"-->
+                <!--:on-success="handleSuccess"-->
+                <!--:on-error="handleErr"-->
+                <!--:before-upload="beforeUpload"-->
+                <!--:on-format-error="handleFormatError"-->
 
-                :format="['jpg','jpeg','png']">
-          <Button type="ghost" icon="ios-cloud-upload-outline">上传图片</Button>
-        </Upload>-->
+                <!--:format="['jpg','jpeg','png']">-->
+          <!--<Button type="ghost" icon="ios-cloud-upload-outline">上传图片</Button>-->
+        <!--</Upload>-->
 
         <img :src="form.avatar" style="max-height: 240px">
+
         <!--<Input v-model="form.avatar" placeholder="请输入"/>-->
       </FormItem>
+      <FormItem label="名字">
+        <Input v-model="form.name" placeholder="请输入"/>
+      </FormItem>
+      <FormItem label="简介">
+        <Input v-model="form.introduce" placeholder="请输入"/>
+      </FormItem>
       <FormItem label="内容">
-        <ueditor :value="form.content" :config="config" ref="ueditor"></ueditor>
-      </FormItem>
-      <FormItem label="来源">
-        <Input v-model="form.from" placeholder="请输入"/>
-      </FormItem>
-      <FormItem label="概览">
-        <Input v-model="form.preview" placeholder="请输入"/>
+        <ueditor :value="form.contents" :config="config" ref="ueditor"></ueditor>
       </FormItem>
       <FormItem>
         <Button :loading="isLoading" @click="submit" type="primary">提交</Button>
@@ -60,6 +53,7 @@
   import qs from 'qs'
   import ueditor from '../../ueditor.vue'
   import myUpload from 'vue-image-crop-upload';
+
   export default {
     components: {
       ueditor,
@@ -67,18 +61,14 @@
     },
     data() {
       return {
-        headers: 'http://localhost:8080/static/img/ex_logo.png',
         getID: '',
         isEdit: false,
-        languages: [],
         form: {
           id: 0,
           avatar: '',
-          tag: '',
-          title: '',
-          content: '',
-          from: '',
-          preview: ''
+          name: '',
+          introduce: '',
+          contents: ''
         },
         isLoading: false,
         visible: false,
@@ -98,17 +88,15 @@
     },
     methods: {
       getDetail() {
-        this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
+        this.$http.post('/api/admin/person/detail?id=' + this.getID).then((response) => {
           let res = response.data
           if (res.status === 10000) {
             this.form = {
-              id: res.article.ID,
-              avatar: res.article.Avatar,
-              tag: res.article.TagStr,
-              title: res.article.Title,
-              content: res.article.Content,
-              from: res.article.From,
-              preview: res.article.Preview
+              id: res.introduction.ID,
+              avatar: res.introduction.Avatar,
+              name: res.introduction.Name,
+              contents: res.introduction.Contents,
+              introduce: res.introduction.Introduce
             }
           } else {
             this.$Message.error('获取失败，请稍候再试')
@@ -142,32 +130,27 @@
 //        this.visible = true
 //      },
       submit() {
-        this.form.content = this.$refs.ueditor.getContent()
+        this.form.contents = this.$refs.ueditor.getContent()
         console.log(this.form)
-        if (!this.form.title || !this.form.preview || !this.form.content) {
+        if (!this.form.name || !this.form.introduce || !this.form.contents) {
           this.$Message.error('内容填写不完整')
           return
         }
-        if (!this.form.language) {
-          this.form.language = '通用'
-        }
 //        this.$ShowLoading()
-        this.$http.post('/api/admin/article/save', qs.stringify(this.form)).then((response) => {
+        this.$http.post('/api/admin/person/save', qs.stringify(this.form)).then((response) => {
           let res = response.data
           if (res.status === 10001) {
-            this.$Message.error('对应文章不存在')
+            this.$Message.error('对应人物描述不存在')
           } else if (res.status === 10000) {
             this.$Message.success('保存成功')
-            this.$router.push({path: '/admin/main/article'})
+            this.$router.push({path: '/admin/main/person'})
             this.$emit('refresh')
             this.form = {
               id: 0,
               avatar: '',
-              tag: '',
-              title: '',
-              content: '',
-              from: '',
-              preview: ''
+              name: '',
+              contents: '',
+              introduce: ''
             }
             this.visible = false
           } else {
@@ -180,8 +163,7 @@
         })
       },
 /*      //上传图片相关函数
-
-      handleSuccess(res) {
+      handleSuccess (res) {
 //        console.log(res)
         if (res.status === 10000) {
           this.form.avatar = 'http://120.79.132.143:8101' + res.filepath;
@@ -190,12 +172,12 @@
           this.$Message.error('上传失败,请重试')
         }
       },
-      handleErr() {
+      handleErr () {
         this.$Message.error('通讯错误，请重试')
       },
-      beforeUpload() {
+      beforeUpload () {
       },
-      handleFormatError() {
+      handleFormatError () {
         this.$Message.error('文件格式不正确,请上传 jpg 或 png 格式的图片')
       },*/
       //上传裁剪图片的函数们

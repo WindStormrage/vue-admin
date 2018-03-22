@@ -18,14 +18,14 @@
       <FormItem label="标题:">
         {{form.title}}
       </FormItem>
-      <FormItem label="标签:">
-        {{form.tag}}
+      <FormItem label="作者:">
+        {{form.author}}
       </FormItem>
-      <FormItem label="来源:">
-        {{form.from}}
+      <FormItem label="访问人数:">
+        {{form.visitors}}
       </FormItem>
       <FormItem label="内容:">
-        <div v-html="form.content"></div>
+        <div v-html="form.contents"></div>
       </FormItem>
       <FormItem label="概览:">
         {{form.preview}}
@@ -45,7 +45,7 @@
           avatar: '',
           title: '',
           tag: '',
-          content: '',
+          contents: '',
           from: '',
           preview: ''
         },
@@ -65,17 +65,17 @@
     },
     methods: {
       getDetail() {
-        this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
+        this.$http.post('/api/admin/news/detail?id=' + this.getID).then((response) => {
           let res = response.data
           if (res.status === 10000) {
             this.form = {
-              id: res.article.ID,
-              avatar: res.article.Avatar,
-              title: res.article.Title,
-              tag: res.article.TagStr,
-              content: res.article.Content,
-              from: res.article.From,
-              preview: res.article.Preview
+              id: res.news.ID,
+              avatar: res.news.Avatar,
+              title: res.news.Title,
+              author: res.news.Author,
+              contents: res.news.Contents,
+              visitors: res.news.Visitors,
+              preview: res.news.Preview
             }
           } else {
             this.$Message.error('获取失败，请稍候再试')

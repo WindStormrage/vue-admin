@@ -1,8 +1,5 @@
 <style lang="stylus">
   #article
-    .toolbox
-      margin-bottom 20px
-
     .page
       display flex
       margin-top 10px
@@ -12,14 +9,9 @@
 </style>
 <template>
   <div id="article">
-    <!--<div class="toolbox">-->
-    <!--<Select @on-change="changeLanguage" placeholder="选择类别" style="width:200px;">-->
-    <!--<Option v-for="item in languages" :value="item.Lang" :key="item.Lang">{{ item.Name }}</Option>-->
-    <!--</Select>-->
-    <!--</div>-->
-    <Table :columns="columns" :data="articles" stripe></Table>
-    <Button @click="$router.push({path: '/admin/main/article/save'})" type="primary" icon="plus"
-            style="margin-top: 20px">添加文章
+    <Table :columns="columns" :data="introductions" stripe></Table>
+    <Button @click="$router.push({path: '/admin/main/person/save'})" type="primary" icon="plus"
+            style="margin-top: 20px">添加人物
     </Button>
     <!--<save @refresh="listArticle()" ref="save"></save>-->
     <div class="page">
@@ -31,13 +23,13 @@
 
 <script>
   import qs from 'qs'
-  import save from './option/save.vue'
-  import detail from './option/detail.vue'
+  import psave from './option/psave.vue'
+  import pdetail from './option/pdetail.vue'
 
   export default {
     components: {
-      save,
-      detail
+      psave,
+      pdetail
     },
     data() {
       return {
@@ -47,8 +39,7 @@
           per: 10
         },
         count: 0,
-        articles: [],
-        languages: [],
+        introductions: [],
         columns: [
           {
             title: 'ID',
@@ -59,6 +50,7 @@
             key: 'Avatar',
             render: (h,params) =>{
               let a = params.row.Avatar;
+              console.log(a);
               return h('img',{
                 attrs:{
                   src:a,
@@ -68,37 +60,17 @@
             }
           },
           {
-            title: '标题',
-            key: 'Title'
+            title: '名字',
+            key: 'Name'
           },
           {
-            title: '标签',
-            key: 'TagStr'
+            title: '简介',
+            key: 'Introduce'
           },
           {
-            title: '来源',
-            key: 'From'
-            // render: (h, params) => {
-            //   let status = params.row.Language
-            //   let state = '未知'
-            //   if (status === 'zh-CN') {
-            //     state = '简体中文'
-            //   }
-            //   if (status === 'en-US') {
-            //     state = '英文'
-            //   }
-            //   return h('div', [
-            //     h('Span', {
-            //       props: {
-            //         type: 'text'
-            //       }
-            //     }, state)
-            //   ])
-            // }
-          },
-          {
-            title: '概览',
-            key: 'Preview'
+            title: '内容',
+            key: 'Contents',
+            type: 'html'
           },
           {
             title: '操作',
@@ -111,7 +83,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$router.push({path: '/admin/main/article/detail?id=' + params.row.ID})
+                      this.$router.push({path: '/admin/main/person/detail?id=' + params.row.ID})
                     }
                   }
                 }, '详情'),
@@ -122,7 +94,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$router.push({path: '/admin/main/article/save?id=' + params.row.ID})
+                      this.$router.push({path: '/admin/main/person/save?id=' + params.row.ID})
                     }
                   }
                 }, '编辑'),
@@ -170,19 +142,19 @@
       removeArticle(id) {
         this.$Modal.confirm({
           title: '提示',
-          content: '确认删除当前文章?',
+          content: '确认删除当前人物描述?',
           onOk: () => {
 //            this.$ShowLoading()
-            this.$http.post('/api/admin/article/delete', qs.stringify({
+            this.$http.post('/api/admin/person/delete', qs.stringify({
               id: id
             })).then((response) => {
               let res = response.data
               if (res.status === 10002) {
                 this.$Message.error('删除失败')
-                this.$router.push({path: '/admin/main/article'})
+                this.$router.push({path: '/admin/main/person'})
               } else if (res.status === 10001) {
-                this.$Message.error('该文章未找到')
-                this.$router.push({path: '/admin/main/article'})
+                this.$Message.error('该人物描述未找到')
+                this.$router.push({path: '/admin/main/person'})
               } else if (res.status === 10000) {
                 this.$Message.success('删除成功')
                 this.listArticle()
@@ -197,13 +169,12 @@
       },
       listArticle() {
 //        this.$ShowLoading()
-        this.$http.post('/api/admin/article/list', qs.stringify(
+        this.$http.post('/api/admin/person/list', qs.stringify(
           this.query
         )).then((response) => {
           let res = response.data
           if (res.status === 10000) {
-            this.articles = res.articles
-            console.log(res.articles)
+            this.introductions = res.introductions
             this.query = {
               page: res.page,
               per: res.per

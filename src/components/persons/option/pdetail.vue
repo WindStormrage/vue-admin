@@ -15,20 +15,14 @@
       <FormItem label="头像:">
         <img :src="form.avatar" style="max-height: 240px">
       </FormItem>
-      <FormItem label="标题:">
-        {{form.title}}
+      <FormItem label="名字:">
+        {{form.name}}
       </FormItem>
-      <FormItem label="标签:">
-        {{form.tag}}
-      </FormItem>
-      <FormItem label="来源:">
-        {{form.from}}
+      <FormItem label="简介:">
+        {{form.introduce}}
       </FormItem>
       <FormItem label="内容:">
-        <div v-html="form.content"></div>
-      </FormItem>
-      <FormItem label="概览:">
-        {{form.preview}}
+        <div v-html="form.contents"></div>
       </FormItem>
     </Form>
   </div>
@@ -43,11 +37,9 @@
         form: {
           id: 0,
           avatar: '',
-          title: '',
-          tag: '',
-          content: '',
-          from: '',
-          preview: ''
+          name: '',
+          introduce: '',
+          contents: ''
         },
         isLoading: false,
         visible: false,
@@ -65,17 +57,15 @@
     },
     methods: {
       getDetail() {
-        this.$http.post('/api/admin/article/detail?id=' + this.getID).then((response) => {
+        this.$http.post('/api/admin/person/detail?id=' + this.getID).then((response) => {
           let res = response.data
           if (res.status === 10000) {
             this.form = {
-              id: res.article.ID,
-              avatar: res.article.Avatar,
-              title: res.article.Title,
-              tag: res.article.TagStr,
-              content: res.article.Content,
-              from: res.article.From,
-              preview: res.article.Preview
+              id: res.introduction.ID,
+              avatar: res.introduction.Avatar,
+              name: res.introduction.Name,
+              contents: res.introduction.Contents,
+              introduce: res.introduction.Introduce
             }
           } else {
             this.$Message.error('获取失败，请稍候再试')

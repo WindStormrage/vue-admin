@@ -75,7 +75,9 @@
                 <template slot="title">
                   <Icon type="film-marker"></Icon>
                 </template>
-                <MenuItem name="1-1">文章管理</MenuItem>
+                <MenuItem name="1-1">健康文章管理</MenuItem>
+                <MenuItem name="1-2">人物管理</MenuItem>
+                <MenuItem name="1-3">新闻管理</MenuItem>
               </Submenu>
             </Menu>
           </i-Col>
@@ -102,7 +104,15 @@
         nav: {
           '1-1': {
             path: '/admin/main/article',
-            title: '选手管理'
+            title: '健康文章管理'
+          },
+          '1-2': {
+            path: '/admin/main/person',
+            title: '人物管理'
+          },
+          '1-3': {
+            path: '/admin/main/news',
+            title: '新闻管理'
           }
         }
       }

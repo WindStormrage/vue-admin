@@ -18,7 +18,7 @@
     <!--</Select>-->
     <!--</div>-->
     <Table :columns="columns" :data="articles" stripe></Table>
-    <Button @click="$router.push({path: '/admin/main/article/save'})" type="primary" icon="plus"
+    <Button @click="$router.push({path: '/admin/main/news/save'})" type="primary" icon="plus"
             style="margin-top: 20px">添加文章
     </Button>
     <!--<save @refresh="listArticle()" ref="save"></save>-->
@@ -72,12 +72,12 @@
             key: 'Title'
           },
           {
-            title: '标签',
-            key: 'TagStr'
+            title: '作者',
+            key: 'Author'
           },
           {
-            title: '来源',
-            key: 'From'
+            title: '访问人数',
+            key: 'Visitors'
             // render: (h, params) => {
             //   let status = params.row.Language
             //   let state = '未知'
@@ -111,7 +111,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$router.push({path: '/admin/main/article/detail?id=' + params.row.ID})
+                      this.$router.push({path: '/admin/main/news/detail?id=' + params.row.ID})
                     }
                   }
                 }, '详情'),
@@ -122,7 +122,7 @@
                   },
                   on: {
                     click: () => {
-                      this.$router.push({path: '/admin/main/article/save?id=' + params.row.ID})
+                      this.$router.push({path: '/admin/main/news/save?id=' + params.row.ID})
                     }
                   }
                 }, '编辑'),
@@ -173,16 +173,16 @@
           content: '确认删除当前文章?',
           onOk: () => {
 //            this.$ShowLoading()
-            this.$http.post('/api/admin/article/delete', qs.stringify({
+            this.$http.post('/api/admin/news/delete', qs.stringify({
               id: id
             })).then((response) => {
               let res = response.data
               if (res.status === 10002) {
                 this.$Message.error('删除失败')
-                this.$router.push({path: '/admin/main/article'})
+                this.$router.push({path: '/admin/main/news'})
               } else if (res.status === 10001) {
                 this.$Message.error('该文章未找到')
-                this.$router.push({path: '/admin/main/article'})
+                this.$router.push({path: '/admin/main/news'})
               } else if (res.status === 10000) {
                 this.$Message.success('删除成功')
                 this.listArticle()
@@ -197,13 +197,14 @@
       },
       listArticle() {
 //        this.$ShowLoading()
-        this.$http.post('/api/admin/article/list', qs.stringify(
+        this.$http.post('/api/admin/news/list', qs.stringify(
           this.query
         )).then((response) => {
-          let res = response.data
+          let res = response.data;
+          console.log(res)
           if (res.status === 10000) {
-            this.articles = res.articles
-            console.log(res.articles)
+            this.articles = res.news
+            console.log(res.news)
             this.query = {
               page: res.page,
               per: res.per
